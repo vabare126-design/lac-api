@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <title>Painel Admin LAC</title>
+    <style>
+        body { background: #1a1a2e; color: white; font-family: Arial; padding: 20px; }
+        h1 { color: #e94560; text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th { background: #16213e; padding: 10px; }
+        td { padding: 10px; text-align: center; border-bottom: 1px solid #333; }
+        .btn-kick { background: #f5a623; border: none; color: white; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
+        .btn-ban { background: #e94560; border: none; color: white; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
+        .btn-kick:hover { background: #d4911e; }
+        .btn-ban:hover { background: #c73652; }
+    </style>
+</head>
+<body>
+    <h1>🎮 Painel Admin LAC</h1>
+    <table>
+        <thead>
+            <tr>
+                <th>Jogador</th>
+                <th>Kills</th>
+                <th>Ações</th>
+            </tr>
+        </thead>
+        <tbody id="tabela"></tbody>
+    </table>
+
+    <script>
+        async function carregar() {
+            const res = await fetch('/ranking')
+            const jogadores = await res.json()
+            const tabela = document.getElementById('tabela')
+            tabela.innerHTML = ''
+            jogadores.forEach(j => {
+                tabela.innerHTML += `
+                    <tr>
+                        <td>${j.player}</td>
+                        <td>${j.kills}</td>
+                        <td>
+                            <button class="btn-kick" onclick="kickar('${j.player}')">👢 Kickar</button>
+                            <button class="btn-ban" onclick="banir('${j.player}')">🔨 Banir</button>
+                        </td>
+                    </tr>`
+            })
+        }
+
+        async function kickar(player) {
+            await fetch('/kickar?player=' + player)
+            alert(player + ' foi kickado!')
+        }
+
+        async function banir(player) {
+            await fetch('/banir?player=' + player)
+            alert(player + ' foi banido!')
+        }
+
+        carregar()
+        setInterval(carregar, 5000)
+    </script>
+</body>
+</html>
