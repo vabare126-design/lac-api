@@ -1,64 +1,332 @@
+🏗️ PASSO 2: Atualizar o admin.html
+No VSCode, abre o admin.html, seleciona tudo (Ctrl+A), deleta, e cola TUDO isso:
+
 <!DOCTYPE html>
 <html lang="pt-br">
 <head>
-    <meta charset="UTF-8">
-    <title>Painel Admin LAC</title>
-    <style>
-        body { background: #1a1a2e; color: white; font-family: Arial; padding: 20px; }
-        h1 { color: #e94560; text-align: center; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { background: #16213e; padding: 10px; }
-        td { padding: 10px; text-align: center; border-bottom: 1px solid #333; }
-        .btn-kick { background: #f5a623; border: none; color: white; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
-        .btn-ban { background: #e94560; border: none; color: white; padding: 5px 15px; border-radius: 5px; cursor: pointer; }
-        .btn-kick:hover { background: #d4911e; }
-        .btn-ban:hover { background: #c73652; }
-    </style>
+<meta charset="UTF-8">
+<title>RP BRASIL - Painel Admin</title>
+<style>
+* { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Arial, sans-serif; }
+body { background: linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #24243e 100%); color: #fff; min-height: 100vh; padding: 20px; }
+.hidden { display: none !important; }
+
+/* LOGIN */
+#login { max-width: 400px; margin: 100px auto; background: rgba(255,255,255,0.05); padding: 40px; border-radius: 15px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
+#login h1 { text-align: center; margin-bottom: 30px; color: #00d9ff; }
+#login input { width: 100%; padding: 14px; border: 1px solid #444; background: #1a1a2e; color: #fff; border-radius: 8px; margin-bottom: 15px; font-size: 16px; }
+#login button { width: 100%; padding: 14px; background: #00d9ff; color: #000; border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer; }
+#login button:hover { background: #00b8d4; }
+#login .erro { color: #ff5252; text-align: center; margin-top: 10px; }
+
+/* PANEL */
+header { background: rgba(0,0,0,0.3); padding: 20px; border-radius: 12px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+header h1 { color: #00d9ff; font-size: 24px; }
+header .stats { display: flex; gap: 20px; }
+header .stat { background: rgba(0,217,255,0.1); padding: 8px 16px; border-radius: 8px; border: 1px solid rgba(0,217,255,0.3); }
+
+.global-controls { background: rgba(255,193,7,0.1); border: 1px solid rgba(255,193,7,0.3); padding: 15px; border-radius: 12px; margin-bottom: 20px; }
+.global-controls h2 { color: #ffc107; margin-bottom: 10px; font-size: 16px; }
+.global-controls .row { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { padding: 8px 14px; border: none; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: 600; transition: all 0.2s; }
+.btn:hover { transform: translateY(-1px); filter: brightness(1.15); }
+.btn-yellow { background: #ffc107; color: #000; }
+.btn-blue { background: #2196f3; color: #fff; }
+.btn-green { background: #4caf50; color: #fff; }
+.btn-red { background: #f44336; color: #fff; }
+.btn-orange { background: #ff9800; color: #fff; }
+.btn-purple { background: #9c27b0; color: #fff; }
+.btn-gray { background: #607d8b; color: #fff; }
+.btn-dark { background: #37474f; color: #fff; }
+
+#players-container { display: grid; grid-template-columns: repeat(auto-fill, minmax(420px, 1fr)); gap: 16px; }
+.player-card { background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.1); border-radius: 12px; padding: 16px; backdrop-filter: blur(10px); }
+.player-card.banned { border-color: #f44336; background: rgba(244,67,54,0.1); }
+.player-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; padding-bottom: 12px; border-bottom: 1px solid rgba(255,255,255,0.1); }
+.player-name { font-size: 18px; font-weight: bold; color: #00d9ff; }
+.player-kills { background: rgba(255,87,34,0.2); color: #ff5722; padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+.player-pending { background: rgba(255,193,7,0.2); color: #ffc107; padding: 4px 10px; border-radius: 12px; font-size: 11px; margin-left: 5px; }
+
+.section { margin-top: 12px; }
+.section-title { font-size: 11px; color: #888; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px; }
+.btn-row { display: flex; gap: 5px; flex-wrap: wrap; }
+.btn-sm { padding: 5px 10px; font-size: 11px; }
+
+#empty { text-align: center; padding: 60px; color: #888; }
+#toast { position: fixed; bottom: 30px; right: 30px; background: #4caf50; color: #fff; padding: 14px 22px; border-radius: 8px; transform: translateX(500px); transition: transform 0.3s; z-index: 1000; }
+#toast.show { transform: translateX(0); }
+#toast.error { background: #f44336; }
+</style>
 </head>
 <body>
-    <h1>🎮 Painel Admin LAC</h1>
-    <table>
-        <thead>
-            <tr>
-                <th>Jogador</th>
-                <th>Kills</th>
-                <th>Ações</th>
-            </tr>
-        </thead>
-        <tbody id="tabela"></tbody>
-    </table>
 
-    <script>
-        async function carregar() {
-            const res = await fetch('/ranking')
-            const jogadores = await res.json()
-            const tabela = document.getElementById('tabela')
-            tabela.innerHTML = ''
-            jogadores.forEach(j => {
-                tabela.innerHTML += `
-                    <tr>
-                        <td>${j.player}</td>
-                        <td>${j.kills}</td>
-                        <td>
-                            <button class="btn-kick" onclick="kickar('${j.player}')">👢 Kickar</button>
-                            <button class="btn-ban" onclick="banir('${j.player}')">🔨 Banir</button>
-                        </td>
-                    </tr>`
-            })
+<div id="login">
+  <h1>🎮 RP BRASIL</h1>
+  <h3 style="text-align:center; margin-bottom:20px; color:#888;">Painel Admin</h3>
+  <input type="password" id="senha" placeholder="Senha" onkeypress="if(event.key==='Enter')login()">
+  <button onclick="login()">Entrar</button>
+  <div class="erro" id="erro"></div>
+</div>
+
+<div id="painel" class="hidden">
+  <header>
+    <h1>🎮 RP BRASIL - Admin</h1>
+    <div class="stats">
+      <div class="stat">👥 Online: <strong id="count">0</strong></div>
+      <button class="btn btn-gray" onclick="logout()">Sair</button>
+    </div>
+  </header>
+
+  <div class="global-controls">
+    <h2>🌍 Controles Globais (afetam todos)</h2>
+    <div class="row">
+      <button class="btn btn-yellow" onclick="globalAct('TIME_DAY')">☀️ Dia</button>
+      <button class="btn btn-dark" onclick="globalAct('TIME_NIGHT')">🌙 Noite</button>
+      <button class="btn btn-blue" onclick="globalAct('WEATHER_RAIN')">🌧️ Chuva</button>
+      <button class="btn btn-yellow" onclick="globalAct('WEATHER_CLEAR')">⛅ Limpar Clima</button>
+      <button class="btn btn-purple" onclick="globalAct('MSG_WELCOME')">📢 Boas-vindas</button>
+      <button class="btn btn-orange" onclick="globalAct('MSG_EVENT')">🎉 Evento</button>
+      <button class="btn btn-red" onclick="globalAct('MSG_WARN')">⚠️ Aviso</button>
+    </div>
+  </div>
+
+  <div id="players-container"></div>
+  <div id="empty">Aguardando jogadores conectarem...</div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+const API = ''
+let SENHA = localStorage.getItem('rpsenha') || ''
+
+if (SENHA) tryAutoLogin()
+
+async function tryAutoLogin() {
+  const r = await fetch('/api/players?pass=' + encodeURIComponent(SENHA))
+  if (r.ok) showPanel()
+}
+
+async function login() {
+  const senha = document.getElementById('senha').value
+  const r = await fetch('/api/login', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ password: senha })
+  })
+  if (r.ok) {
+    SENHA = senha
+    localStorage.setItem('rpsenha', senha)
+    showPanel()
+  } else {
+    document.getElementById('erro').textContent = 'Senha incorreta!'
+  }
+}
+
+function logout() {
+  localStorage.removeItem('rpsenha')
+  location.reload()
+}
+
+function showPanel() {
+  document.getElementById('login').classList.add('hidden')
+  document.getElementById('painel').classList.remove('hidden')
+  loadPlayers()
+  setInterval(loadPlayers, 3000)
+}
+
+async function loadPlayers() {
+  const r = await fetch('/api/players?pass=' + encodeURIComponent(SENHA))
+  if (!r.ok) return
+  const players = await r.json()
+  document.getElementById('count').textContent = players.length
+  const container = document.getElementById('players-container')
+  document.getElementById('empty').style.display = players.length === 0 ? 'block' : 'none'
+  container.innerHTML = players.map(renderPlayer).join('')
+}
+
+function renderPlayer(p) {
+  const name = escapeHtml(p.player)
+  const banClass = p.isBanned ? 'banned' : ''
+  const pending = p.pendingCount > 0 ? `<span class="player-pending">⏳ ${p.pendingCount} ações</span>` : ''
+  return `
+  <div class="player-card ${banClass}">
+    <div class="player-header">
+      <div>
+        <span class="player-name">${name}</span>
+        <span class="player-kills">${p.kills} kills</span>
+        ${pending}
+      </div>
+      <button class="btn btn-sm btn-gray" onclick="clearActions('${name}')">🗑️</button>
+    </div>
+
+    <div class="section">
+      <div class="section-title">💰 Dinheiro Vivo (cash)</div>
+      <div class="btn-row">
+        <button class="btn btn-sm btn-green" onclick="act('${name}','CASH_100')">+100</button>
+        <button class="btn btn-sm btn-green" onclick="act('${name}','CASH_1000')">+1k</button>
+        <button class="btn btn-sm btn-green" onclick="act('${name}','CASH_5000')">+5k</button>
+        <button class="btn btn-sm btn-green" onclick="act('${name}','CASH_10000')">+10k</button>
+        <button class="btn btn-sm btn-green" onclick="act('${name}','CASH_50000')">+50k</button>
+        <button class="btn btn-sm btn-green" onclick="act('${name}','CASH_100000')">+100k</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">💳 Banco (card)</div>
+      <div class="btn-row">
+        <button class="btn btn-sm btn-blue" onclick="act('${name}','CARD_1000')">+1k</button>
+        <button class="btn btn-sm btn-blue" onclick="act('${name}','CARD_10000')">+10k</button>
+        <button class="btn btn-sm btn-blue" onclick="act('${name}','CARD_50000')">+50k</button>
+        <button class="btn btn-sm btn-blue" onclick="act('${name}','CARD_100000')">+100k</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">💸 Dinheiro Sujo</div>
+      <div class="btn-row">
+        <button class="btn btn-sm btn-purple" onclick="act('${name}','DIRTY_5000')">+5k</button>
+        <button class="btn btn-sm btn-purple" onclick="act('${name}','DIRTY_10000')">+10k</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">👔 Roles</div>
+      <div class="btn-row">
+        <button class="btn btn-sm btn-gray" onclick="act('${name}','ROLE_CIVILIAN')">Civil</button>
+        <button class="btn btn-sm btn-blue" onclick="act('${name}','ROLE_POLICE')">Polícia</button>
+        <button class="btn btn-sm btn-red" onclick="act('${name}','ROLE_CRIMINAL')">Criminal</button>
+        <button class="btn btn-sm btn-yellow" onclick="act('${name}','ROLE_TAXI')">Taxi</button>
+        <button class="btn btn-sm btn-green" onclick="act('${name}','ROLE_DOCTOR')">Doctor</button>
+        <button class="btn btn-sm btn-orange" onclick="act('${name}','ROLE_MECHANIC')">Mech</button>
+        <button class="btn btn-sm btn-purple" onclick="act('${name}','ROLE_MAFIA')">Mafia</button>
+        <button class="btn btn-sm btn-dark" onclick="act('${name}','ROLE_PATAAN')">Pataan</button>
+        <button class="btn btn-sm btn-dark" onclick="act('${name}','ROLE_ELEMENTS')">Elements</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🚗 Dar Carro</div>
+      <div class="btn-row">
+        <button class="btn btn-sm btn-blue" onclick="act('${name}','CAR_PRIDE')">Pride</button>
+        <button class="btn btn-sm btn-blue" onclick="act('${name}','CAR_ELISSAN')">Elissan</button>
+        <button class="btn btn-sm btn-blue" onclick="act('${name}','CAR_MAROCK')">Marock</button>
+        <button class="btn btn-sm btn-blue" onclick="act('${name}','CAR_ZUPRA')">Zupra</button>
+        <button class="btn btn-sm btn-blue" onclick="act('${name}','CAR_KING')">King</button>
+        <button class="btn btn-sm btn-blue" onclick="act('${name}','CAR_CHEVELLE')">Chevelle</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🔫 Armas</div>
+      <div class="btn-row">
+        <button class="btn btn-sm btn-orange" onclick="act('${name}','WEAPON_M9')">M9</button>
+        <button class="btn btn-sm btn-orange" onclick="act('${name}','WEAPON_AR15')">AR15</button>
+        <button class="btn btn-sm btn-orange" onclick="act('${name}','WEAPON_AWSM')">Sniper</button>
+        <button class="btn btn-sm btn-orange" onclick="act('${name}','WEAPON_M1014')">Shotgun</button>
+        <button class="btn btn-sm btn-orange" onclick="act('${name}','WEAPON_AKM')">AKM</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🎒 Itens</div>
+      <div class="btn-row">
+        <button class="btn btn-sm btn-purple" onclick="act('${name}','ITEM_LOCKPICK')">Lockpick</button>
+        <button class="btn btn-sm btn-blue" onclick="act('${name}','ITEM_WATER')">Água</button>
+        <button class="btn btn-sm btn-orange" onclick="act('${name}','ITEM_HAMBURGER')">Burger</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">🗺️ Teleportar</div>
+      <div class="btn-row">
+        <button class="btn btn-sm btn-green" onclick="act('${name}','TP_HOSPITAL')">Hospital</button>
+        <button class="btn btn-sm btn-blue" onclick="act('${name}','TP_POLICE')">Delegacia</button>
+        <button class="btn btn-sm btn-red" onclick="act('${name}','TP_JAIL')">Cadeia</button>
+        <button class="btn btn-sm btn-yellow" onclick="act('${name}','TP_BANK')">Banco</button>
+        <button class="btn btn-sm btn-gray" onclick="act('${name}','TP_SPAWN')">Spawn</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">❤️ Vida</div>
+      <div class="btn-row">
+        <button class="btn btn-sm btn-green" onclick="act('${name}','HEAL')">💚 Curar</button>
+        <button class="btn btn-sm btn-red" onclick="act('${name}','KILL')">💀 Matar</button>
+        <button class="btn btn-sm btn-purple" onclick="act('${name}','DRUNK')">🍺 Bêbado</button>
+        <button class="btn btn-sm btn-yellow" onclick="act('${name}','UNDRUNK')">😎 Sóbrio</button>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-title">⚖️ Justiça</div>
+      <div class="btn-row">
+        <button class="btn btn-sm btn-orange" onclick="act('${name}','CLEAR_STARS')">Limpar Estrelas</button>
+        <button class="btn btn-sm btn-orange" onclick="act('${name}','CLEAR_DIRTY')">Limpar Sujo</button>
+        ${p.isBanned 
+          ? `<button class="btn btn-sm btn-green" onclick="unban('${name}')">✅ Desbanir</button>` 
+          : `<button class="btn btn-sm btn-yellow" onclick="act('${name}','KICK')">👢 Kickar</button>
+             <button class="btn btn-sm btn-red" onclick="confirmAct('${name}','BAN','Banir ${name}?')">🔨 Banir</button>`
         }
+      </div>
+    </div>
+  </div>`
+}
 
-        async function kickar(player) {
-            await fetch('/kickar?player=' + player)
-            alert(player + ' foi kickado!')
-        }
+async function act(player, action) {
+  const r = await fetch('/api/action', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pass: SENHA, player, action })
+  })
+  if (r.ok) toast(`✅ ${action} → ${player}`)
+  else toast('❌ Erro', true)
+  loadPlayers()
+}
 
-        async function banir(player) {
-            await fetch('/banir?player=' + player)
-            alert(player + ' foi banido!')
-        }
+function confirmAct(player, action, msg) {
+  if (confirm(msg)) act(player, action)
+}
 
-        carregar()
-        setInterval(carregar, 5000)
-    </script>
+async function globalAct(action) {
+  const r = await fetch('/api/global', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pass: SENHA, action })
+  })
+  if (r.ok) toast(`🌍 Global: ${action}`)
+}
+
+async function unban(player) {
+  await fetch('/api/unban', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pass: SENHA, player })
+  })
+  toast(`✅ ${player} desbanido`)
+  loadPlayers()
+}
+
+async function clearActions(player) {
+  await fetch('/api/clear', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ pass: SENHA, player })
+  })
+  toast(`🗑️ Ações limpas`)
+  loadPlayers()
+}
+
+function toast(msg, err) {
+  const t = document.getElementById('toast')
+  t.textContent = msg
+  t.className = err ? 'show error' : 'show'
+  setTimeout(() => t.className = err ? 'error' : '', 2500)
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))
+}
+</script>
 </body>
 </html>
